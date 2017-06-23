@@ -1,0 +1,4 @@
+^/trunk/Matlab/MachineLearning/Lib/+libPerformance +libPerformance
+^/trunk/Matlab/MachineLearning/Lib/+libSvm +libSvm
+^/trunk/Matlab/MachineLearning/Lib/+libML +libML
+^/trunk/Matlab/Common/Lib/+libUtil +libUtil
