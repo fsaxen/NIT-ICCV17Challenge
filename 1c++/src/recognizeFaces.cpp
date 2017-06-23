@@ -8,8 +8,8 @@
 #include <vector>
 #include <string>
 
-#include <FaceBase/FaceRegistrationTrained.hpp>
-#include <FaceBase/FaceLibDlib.hpp>
+//#include <FaceBase/FaceRegistrationTrained.hpp>
+//#include <FaceBase/FaceLibDlib.hpp>
 
 #include <dlib/opencv.h>
 #include <dlib/gui_widgets.h>
@@ -61,19 +61,16 @@ using face_rec_net_type = loss_metric<fc_no_bias<128, avg_pool_everything<
 	input_rgb_image_sized<150>
 	>>>>>>>>>>>>;
 
-void recognizeFaces() 
+void recognizeFaces(const std::string& exdata_dir, const std::string& train_or_val_or_test)
 try
 {
-	std::string iccvDatasetFolder = "/home/frerk/datasets/ICCV17Challenge/";
-	
-	std::string face_det_file = iccvDatasetFolder + "exdata/facedet_val.txt";
-	std::string filename_list_file = iccvDatasetFolder + "exdata/filenames_val.txt";
-	
-	std::string dest_file = iccvDatasetFolder + "exdata/face_recognition_val.txt";
+	std::string filename_list_filename = exdata_dir + train_or_val_or_test + "_filenames.txt";
+	std::string filename_face_detection = exdata_dir + train_or_val_or_test + "_facedet.txt";
+	std::string filename_face_recognition = exdata_dir + train_or_val_or_test + "_face_recognition.txt";
 
 	
-	std::string shape_predictor_file = iccvDatasetFolder + "exdata/spd+all=cascade30+oversampling70+trees1500.dat";
-	std::string face_recognition_file = iccvDatasetFolder + "exdata/dlib_face_recognition_resnet_model_v1.dat";
+	std::string shape_predictor_file = exdata_dir + "spd+all=cascade30+oversampling70+trees1500.dat";
+	std::string face_recognition_file = exdata_dir + "dlib_face_recognition_resnet_model_v1.dat";
 	 
 	const long max_frames = 50;
 	
@@ -81,10 +78,10 @@ try
 	std::chrono::steady_clock::time_point time_start = std::chrono::steady_clock::now();
 
 	std::vector<std::string> filename_list;
-	misc::read_filename_list(filename_list_file, filename_list);
+	misc::read_filename_list(filename_list_filename, filename_list);
 
 	std::vector<std::vector<dlib::rectangle>> face_dets_list;
-	misc::read_face_detection(face_det_file, face_dets_list);
+	misc::read_face_detection(filename_face_detection, face_dets_list);
 
 	
 	DLIB_CASSERT(filename_list.size() == face_dets_list.size(), "List size mismatch: \n\t filename_list.size(): " << filename_list.size() << "\n\t face_dets_list.size(): " << face_dets_list.size() << std::endl);
@@ -106,7 +103,7 @@ try
 // 	image_window win;
 	for(long vid_id = 0; vid_id < filename_list.size(); ++vid_id)
 	{
-	      const auto vid_filename = iccvDatasetFolder + filename_list.at(vid_id);
+	      const auto vid_filename = filename_list.at(vid_id);
 	      
 	      std::chrono::steady_clock::time_point time_end = std::chrono::steady_clock::now();
 	      int seconds_expired = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start).count();
@@ -205,7 +202,7 @@ try
 	}
 	
 	// Open dest filename
-	std::ofstream idFile(dest_file);
+	std::ofstream idFile(filename_face_recognition);
 	DLIB_CASSERT(idFile.is_open());
 	DLIB_CASSERT(labels.size() == filename_list.size());
 	for(long vid_id = 0; vid_id < filename_list.size(); ++vid_id)
@@ -213,9 +210,6 @@ try
 		  idFile << vid_id << "," << labels[vid_id] << "\n";
 	}
 	idFile.close();
-	
-	std::cout << "Please hit Enter to exit." << std::endl;
-	cin.get();
 	
 	return;
 }

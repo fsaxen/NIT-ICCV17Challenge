@@ -25,23 +25,18 @@ template <typename SUBNET> using rcon5 = relu<affine<con5<45, SUBNET>>>;
 
 using net_type = loss_mmod<con<1, 9, 9, 1, 1, rcon5<rcon5<rcon5<downsampler<input_rgb_image_pyramid<pyramid_down<6>>>>>>>>;
 
-void detectFace()
+void detectFace(const std::string& exdata_dir, const std::string& train_or_val_or_test)
 {
-	std::string iccvDatasetFolder = "/home/frerk/datasets/ICCVChallenge/";
-	 
 	std::chrono::steady_clock::time_point time_start = std::chrono::steady_clock::now();
 
- 	std::string srcFolder = iccvDatasetFolder;
-	std::string destfile = iccvDatasetFolder + "exdata/facedet_train.txt";
-	std::string filename_list_file = iccvDatasetFolder + "exdata/filenames_train.txt";
-	
-	
-	std::string net_filename = iccvDatasetFolder + "exdata/mmod_human_face_detector.dat";
+	std::string filename_list_filename = exdata_dir + train_or_val_or_test + "_filenames.txt";
+	std::string filename_face_detection = exdata_dir + train_or_val_or_test + "_facedet.txt";
+	std::string net_filename = exdata_dir + "mmod_human_face_detector.dat";
 
 	
 	
 	std::vector<std::string> filename_list;
-	misc::read_filename_list(filename_list_file, filename_list);
+	misc::read_filename_list(filename_list_filename, filename_list);
 
 	net_type net;
 	deserialize(net_filename) >> net;
@@ -49,7 +44,7 @@ void detectFace()
 	long nrError = 0;
 
 	// Open detection filename
-	std::ofstream detFile(destfile);
+	std::ofstream detFile(filename_face_detection);
 	CV_Assert(detFile.is_open());
 	
 	for(const auto& filename : filename_list)
@@ -61,8 +56,8 @@ void detectFace()
 		    int minutes_left = nrVid == 0 ? 0 : seconds_expired * (static_cast<double>(filename_list.size() - nrVid) / (double)nrVid / 60.0);
 
 		    // Open video
-		    std::cout << rpad(cast_to_string(nrVid),3) << "/" << filename_list.size() << ". Approx. " << rpad(cast_to_string(minutes_left), 3) << " minutes left. " << "Processing video: " << filename;
-		    cv::VideoCapture vid(srcFolder + filename);
+		    std::cout << rpad(cast_to_string(nrVid+1),3) << "/" << filename_list.size() << ". Approx. " << rpad(cast_to_string(minutes_left), 3) << " minutes left. " << "Processing video: " << filename;
+		    cv::VideoCapture vid(filename);
 		    CV_Assert(vid.isOpened());
 
 		    cv::Mat cvBGRImg;

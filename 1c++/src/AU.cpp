@@ -532,8 +532,8 @@ bool AUIntensityEstimation::lbp(const cv::Mat& image, cv::Mat& feature) const
 
     // Return with LBP histogram.
 	const int channels[] = {0};
-	const int histSize[] = {m_lbp_num};
-	const float range[] = {0, m_lbp_num};
+	const int histSize[] = {static_cast<int>(m_lbp_num)};
+	const float range[] = {0, static_cast<float>(m_lbp_num)};
 	const float* ranges[] = {range};
 	cv::calcHist(&result, 1, channels, cv::Mat(), feature, 1, histSize, ranges, true, false);
 

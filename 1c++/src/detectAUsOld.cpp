@@ -6,6 +6,9 @@
 #include <iostream>
 #include <chrono>
 
+#include <dlib/image_processing.h>
+#include <dlib/opencv.h>
+
 #include <FaceBase/FaceRegistrationAffineMeanShape.hpp>
 #include <FaceBase/FaceLibDlib.hpp>
 
@@ -16,29 +19,29 @@
 using namespace dlib;
 using namespace std;
 
-int detectAUsOld() 
+int detectAUsOld(const std::string& exdata_dir, const std::string& train_or_val_or_test)
 try
 {
-	const static std::string datasetFolder = std::string("/home/frerk/datasets/ICCV17Challenge/");
-	std::string face_det_file = datasetFolder + "exdata/facedet_train.txt";
-	std::string filename_list_file = datasetFolder + "exdata/filenames_train.txt";
-	std::string shape_predictor_file = datasetFolder + "exdata/spd+all=cascade30+oversampling70+trees1500.dat";
-	std::string mean_shape_file = datasetFolder + "exdata/mean_face_shape_intraface.dat";
-	std::string feature_model_file = datasetFolder + "exdata/lbp_10_10_8_1.txt";
-	std::string mean_std_file = datasetFolder + "exdata/Features_mean_std_disfa.txt";
-	std::string regressor_file = datasetFolder + "exdata/Regression_model_disfa_1_2_4_6_9_12_25.txt";
+	std::string filename_list_filename = exdata_dir + train_or_val_or_test + "_filenames.txt";
+	std::string filename_face_detection = exdata_dir + train_or_val_or_test + "_facedet.txt";
+	std::string filename_AUsOld = exdata_dir + train_or_val_or_test + "_AUOld.txt";
+	
+	std::string shape_predictor_file = exdata_dir + "spd+all=cascade30+oversampling70+trees1500.dat";
+	std::string mean_shape_file = exdata_dir + "mean_face_shape_intraface.dat";
+	std::string feature_model_file = exdata_dir + "lbp_10_10_8_1.txt";
+	std::string mean_std_file = exdata_dir + "Features_mean_std_disfa.txt";
+	std::string regressor_file = exdata_dir + "Regression_model_disfa_1_2_4_6_9_12_25.txt";
 
-	std::string dest_AU_file = datasetFolder + "exdata/AUOld_train_nomax.txt";
 	 
 	std::chrono::steady_clock::time_point time_start = std::chrono::steady_clock::now();
 
 
 	std::vector<std::string> filename_list;
-	misc::read_filename_list(filename_list_file, filename_list);
+	misc::read_filename_list(filename_list_filename, filename_list);
 
 	
 	std::vector<std::vector<dlib::rectangle>> face_dets_list;
-	misc::read_face_detection(face_det_file, face_dets_list);
+	misc::read_face_detection(filename_face_detection, face_dets_list);
 
 	
 	using t_AUs = std::vector<float>;
@@ -59,8 +62,6 @@ try
 	AUIntensityEstimation AU(feature_model_file, mean_std_file, regressor_file);
 	DLIB_CASSERT(AU.is_initialized(), "Error loading AU model.");
 
-	FaceLibDlib facelib;
-
 	
 
 	matrix<rgb_pixel> img;
@@ -73,7 +74,7 @@ try
 
 	for(long vid_id = 0; vid_id < filename_list.size(); ++vid_id)
 	{
-	      const auto vid_filename = datasetFolder + filename_list.at(vid_id);
+	      const auto vid_filename = filename_list.at(vid_id);
 	      
 	      std::chrono::steady_clock::time_point time_end = std::chrono::steady_clock::now();
 	      int seconds_expired = std::chrono::duration_cast<std::chrono::seconds>(time_end - time_start).count();
@@ -131,7 +132,7 @@ try
 	// Save AUs to file
 	DLIB_CASSERT(au_vids.size() == filename_list.size(), "au_vids.size() != filename_list.size(). \n\t au_vids.size(): " << au_vids.size() << "\n\t filename_list.size(): " << filename_list.size() << std::endl);
 	// Open AU filename
-	std::ofstream AUFile(dest_AU_file);
+	std::ofstream AUFile(filename_AUsOld);
 	DLIB_CASSERT(AUFile.is_open());
 	for(long vid_id = 0; vid_id < au_vids.size(); ++vid_id)
 	    for(long frame_no = 0; frame_no < au_vids.at(vid_id).size(); ++frame_no)
