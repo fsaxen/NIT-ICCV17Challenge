@@ -6,6 +6,9 @@
 #include <iostream>
 #include <chrono>
 
+// Authors: Frerk Saxen and Philipp Werner
+// License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
+
 #include <dlib/image_processing.h>
 #include <dlib/opencv.h>
 

@@ -1,3 +1,6 @@
+// Authors: Frerk Saxen and Philipp Werner
+// License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
+
 #include <iostream>
 #include <fstream>
 #include <experimental/filesystem>

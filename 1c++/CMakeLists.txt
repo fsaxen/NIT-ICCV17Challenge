@@ -1,3 +1,6 @@
+# Authors: Frerk Saxen and Philipp Werner
+# License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
+
 cmake_minimum_required (VERSION 2.6)
 
 project (ICCV17Challenge)
@@ -9,13 +12,14 @@ set(dlib_path "" CACHE PATH "Dlib folder")
 include(${dlib_path}/dlib/cmake)
 
 message(WARNING "Please make sure that dlib found CUDA and cudnn. Otherwise this project will not work.")
-#message(STATUS "Found CUDA: /usr/local/cuda (found suitable version 8.0, minimum required is 7.5)")
-#message(STATUS "Looking for cuDNN install...")
-#message(STATUS "Building a CUDA test project to see if your compiler is compatible with CUDA...")
-#message(STATUS "Checking if you have the right version of cuDNN installed.")
-#message(STATUS "Found cuDNN: /usr/lib/x86_64-linux-gnu/libcudnn.so")
+# The message should look something like:
+# "Found CUDA: /usr/local/cuda (found suitable version 8.0, minimum required is 7.5)"
+# "Looking for cuDNN install..."
+# "Building a CUDA test project to see if your compiler is compatible with CUDA..."
+# "Checking if you have the right version of cuDNN installed."
+# "Found cuDNN: /usr/lib/x86_64-linux-gnu/libcudnn.so"
 
-# Add OpenCV project
+# Add OpenCV to project
 if(NOT OpenCV_FOUND)
 	FIND_PACKAGE(OpenCV REQUIRED)
 	

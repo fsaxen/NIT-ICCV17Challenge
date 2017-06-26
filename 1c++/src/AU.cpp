@@ -1,3 +1,6 @@
+// Authors: Frerk Saxen and Philipp Werner
+// License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
+
 #include <ActionUnitIntensityEstimation/AU.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

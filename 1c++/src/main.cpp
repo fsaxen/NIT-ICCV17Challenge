@@ -1,3 +1,13 @@
+// Authors: Frerk Saxen and Philipp Werner
+// License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
+
+/* This is the main execution entry for extracting all necessary features for training, validation, and testing.
+ * After providing the necessary arguments (see function help() ), the following functions will be executed in order:
+ * 1. createFileNameList(): A filename list txt file will be created in the exdata directory that lists all video filenames in the dataset folder (given as argument).
+ * 2. detectFace(): For each frame of all videos the face will be detected and the results will be stored in a xxx_facedet.txt file.
+ * 3. detectAUsOld(): We extract 7 different facial action units for each frame and save the results to another txt file.
+ * 4. recognizeFaces(): We cluster similar faces in the dataset to allow intra-personal classification.
+ */
 #include <iostream>
 #include <experimental/filesystem>
 void createFileNameList(const std::string& dataset_dir, const std::string& exdata_dir, const std::string& train_or_val_or_test);
@@ -37,7 +47,7 @@ int main(int argc, char **argv)
   	detectAUsOld(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_AUsOld);
   	std::cout << "Done.\n4. Recognize faces ... " << std::endl;
   	recognizeFaces(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_face_recognition);
-	std::cout << "Done. \nPlease press Enter to exit." << std::endl;
+	std::cout << "Done. \nYou are now finished with the C++ part. Please execute the main.m file in the matlab folder with matlab R2015a or newer." << std::endl;
 	
 	std::cin.get();
 	return 0;
