@@ -1,2 +1,0 @@
-^/trunk/Matlab/MachineLearning/Lib/+libDataset +libDataset
-^/trunk/Matlab/Common/Lib/+libUtil +libUtil

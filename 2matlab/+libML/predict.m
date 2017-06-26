@@ -87,33 +87,15 @@ function [ y, p ] = predict( data, model, ml_param )
 %             p = zeros(n_samples, n_models * sy);
 %             p(:, 1:sy) = y1;
             
-            % Allocate memory for aggregation features = ensemble
-            % predictions
-            x = zeros(n_samples, n_models * syp);
-            x(:, 1 : sy) = y1;
-            if sp > 0
-                x(:, sy + 1 : syp) = p1;
+            % Allocate memory for ensemble predictions
+            yy = zeros(n_samples, n_models);
+            
+            for i = 1 : n_models
+                yy(:,i) = libML.predict(data, model.ensemble{i}, ml_param.ensemble_param);
             end
-            
-            for i = 2 : n_models
-                [yi , pi] = libML.predict(data, model.ensemble{i}, ml_param.ensemble_param);
-                x(:, (i-1) * syp + 1 : (i-1) * syp + sy) = yi;
-%                 p(:, (i-1) * sy + 1 : i * sy) = yi;
-                if sp > 0
-                    x(:, (i-1) * syp + sy + 1 : i * syp) = pi;
-                end
-            end
-            
-            % Create and normalize aggregation dataset
-            data = libDataset.create_dataset(x);
-            data = libDataset.normalize(data, model.aggregation_norm_values);
-            
-            % Predict aggreagtion values
-            %[y, p] = libML.predict(data, model.aggregation_model, ml_param.ensemble_param);
             
             % majority voting:
-            xy = x(:,1:2:end);
-            p = mean(xy,2) - 0.5;
+            p = mean(yy,2) - 0.5;
             y = p > 0;
         case 'lm'
             y = predict(model.ml, data.x(data.sample_idx, :));

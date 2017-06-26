@@ -210,6 +210,7 @@ function [ model ] = train( data, ml_param )
             
         case 'Ensemble'
             % Set standard parameters
+            rng(12345);
             if isfield(ml_param, 'ensemble_num_models')
                 n_models = ml_param.ensemble_num_models;
                 if n_models < 1 || mod(n_models,1) ~= 0
@@ -240,74 +241,7 @@ function [ model ] = train( data, ml_param )
             for i = 1 : n_models
                 model.ensemble{i} = libML.train(data, ml_param.ensemble_param);
             end
-            
-            % Train aggregation model
-            data_agg = redistribute_and_subsample(data, ml_param.ensemble_param);
-            
-            % Predict first ensemble to get the prediction values
-            [y1, p1] = libML.predict(data_agg, model.ensemble{1}, ml_param.ensemble_param);
-            sy = 1; 
-            sp = size(p1, 2);
-            if sp == 1 && all(y1 == p1)
-                % we do not need p if y == p
-                sp = 0;
-            end
-            syp = sy + sp;
-            
-            % Allocate memory for aggregation features = ensemble predictions
-            x = zeros(length(y1), n_models * syp);
-            x(:, 1 : sy) = y1;
-            if sp > 0
-                x(:, sy + 1 : syp) = p1;
-            end
-            
-            % Create features for aggregation model
-            for i = 2 : n_models
-                [xi , pi] = libML.predict(data_agg, model.ensemble{i}, ml_param.ensemble_param);
-                x(:, (i-1) * syp + 1 : (i-1) * syp + sy) = xi;
-                if sp > 0
-                    x(:, (i-1) * syp + sy + 1 : i * syp) = pi;
-                end
-            end
-            data_agg = libDataset.create_dataset(x, data_agg.y(data_agg.sample_idx, data_agg.predictor_idx));
-            data_agg = libDataset.normalize(data_agg);
-            
-            % Train aggregation model
-            model.aggregation_model = libML.train(data_agg, ml_param.ensemble_param);
-            model.aggregation_norm_values = data_agg.norm_values;
-            
-        case 'ExternalProgram'
-            if isfield(ml_param, 'model_fn')
-                if size(data.y,2) > 1
-                    [dir,name,ext] = fileparts(ml_param.model_fn);
-                    model_fn = fullfile(dir, [ name , '_', num2str(data.predictor_idx), ext ]);
-                else
-                    model_fn = ml_param.model_fn;
-                end
-            else
-                model_fn = [tempname,'.txt'];
-            end
-            write_not_always = isfield(ml_param, 'only_write_data_on_format_change') && ml_param.only_write_data_on_format_change;
-            if isfield(ml_param, 'train_data_fn')
-                if write_not_always
-                    data_fn = ml_param.train_data_fn;
-                else
-                    data_fn = [ml_param.train_data_fn '_' num2str(length(data.sample_idx)) 'x' num2str(size(data.x,2) + length(data.predictor_idx)) '.txt'];
-                end
-            else
-                data_fn = [tempname,'.txt'];
-            end
-            % write data to file
-            if ~write_not_always || ~exist(data_fn, 'file')
-                train_data = horzcat(data.x(data.sample_idx,:), data.y(data.sample_idx,data.predictor_idx));
-                dlmwrite(data_fn, train_data, '\t');
-            end
-            % run training program
-            cmd = strrep(ml_param.train_command_line, '$model_fn', model_fn);
-            
-            cmd = strrep(cmd, '$data_fn', data_fn);
-            system(cmd);
-            model.model_fn = model_fn;
+
         otherwise
             error(strcat('Training type: ', ml_param.type, ' not supported yet.'));
     end

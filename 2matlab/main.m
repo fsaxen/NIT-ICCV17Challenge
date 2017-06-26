@@ -4,7 +4,7 @@ data_folder = '../exdata/';
 
 %% import data and extract features from training, validation, and testing set (use train_val_or_test to extract features from each set if needed)
 ImportData;
-DescriptorExtractor18;
+DescriptorExtraction18;
 
 %% train model on training data and test on validation or testing set (choose between validation and testing set with train_val_or_test)
 TrainAndTestOneLinearRankSVM;

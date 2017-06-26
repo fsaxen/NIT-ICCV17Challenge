@@ -1,45 +1,45 @@
-vis = 0;
+vis = 0;    % visualization?
 
-fps = 100;       % Assumption based on estimated playback speed
-cutoff = 1;     % Lowpass cutoff frequency in Hz
-order = 1;
-
-%n_sliding_avg = 5;
+% filenames
 if train_val_or_test == 0
-    fn_in_AUs = [data_folder, 'AUOld_train_nomax.txt'];
-    fn_out = [data_folder, 'AUOld_train_descriptor18.mat'];
+    fn_in_AUs = [data_folder, 'train_AUOld.txt'];
+    fn_out = [data_folder, 'train_AUOld_descriptor18.mat'];
 elseif train_val_or_test == 1
-    fn_in_AUs = [data_folder, 'AUOld_val_nomax.txt'];
-    fn_out = [data_folder, 'AUOld_val_descriptor18.mat'];
+    fn_in_AUs = [data_folder, 'val_AUOld.txt'];
+    fn_out = [data_folder, 'val_AUOld_descriptor18.mat'];
 elseif train_val_or_test == 2
-    fn_in_AUs = [data_folder, 'AUOld_test_nomax.txt'];
-    fn_out = [data_folder, 'AUOld_test_descriptor18.mat'];
+    fn_in_AUs = [data_folder, 'test_AUOld.txt'];
+    fn_out = [data_folder, 'test_AUOld_descriptor18.mat'];
 end
 
-load(fn_in_AUs);
 
 %% Extract descriptors
+
+% load sample table with AU signals
+load(fn_in_AUs);
+
+% smoothing parameters
+fps = 100;
+cutoff = 1;
+order = 1;
 
 n_feat = size(samples(1).data,2);
 n_seq = length(samples);
 if cutoff > 0
-%     fps = 25;
-%     N = 3;                 % Order of polynomial fit
-%     F = 13;                % Window length
-%     [b,a] = sgolay(N,F);   % Calculate S-G coefficients
     [b, a] = butter(order, cutoff/(fps/2));
 end
 
-%sliding_avg_wts = ones(n_sliding_avg, 1) ./ n_sliding_avg;
-
+% for each sample (video)
 for i = 1:n_seq
     label = samples(i).label;
-    features = samples(i).data;
-    %features = features(:,end-2:end);
+    au_signals = samples(i).data;
     seq_descr = [];
-    for j = 1:size(features,2)
-        sig_raw = features(:,j);
-        %sig_s = conv(sig_raw,sliding_avg_wts,'valid');
+    
+    % for each AU signal
+    for j = 1:size(au_signals,2)
+        
+        % smooth signal, calulate speed / acceleration signal
+        sig_raw = au_signals(:,j);
         if cutoff > 0
             sig_s = filtfilt(b, a, sig_raw);
         else
@@ -53,22 +53,18 @@ for i = 1:n_seq
         if cutoff > 0
             sig_a = filtfilt(b, a, sig_a);
         end
-        shift = 0;
-        %offset = 25;
-        %sig_s = sig_s(offset:end-offset);
-        %sig_v = sig_v(offset:end-offset);
-        %sig_a = sig_a(offset:end-offset);
+        
+        % optional visualization
         if vis
             subplot(311);
-            %plot(n_sliding_avg/2+(1:length(sig_s)),sig_s, 'b');
-            %hold on; plot(1:length(sig_raw),sig_raw, 'r'); hold off;
-            plot(shift + (1:length(sig_s)), sig_s, 'b');
+            plot((1:length(sig_s)), sig_s, 'b');
             hold on; plot(sig_raw, 'r'); hold off;
             subplot(312);
-            plot(shift + (1:length(sig_v)), sig_v);
+            plot((1:length(sig_v)), sig_v);
             subplot(313);
-            plot(shift + (1:length(sig_a)), sig_a);
+            plot((1:length(sig_a)), sig_a);
             title(sprintf('feat %i (label %i)', j, label));
+            drawnow;
         end
         
         % Extract descriptor vairables (up to constants)
@@ -115,9 +111,11 @@ for i = 1:n_seq
             warning('some nan descriptor variables');
         end
         
-        
         descr_au = reshape(descr, 1, []);
+        
+        % add squared values of value / variability / area domains
         descr_au = horzcat(descr_au, descr_au(:,[1:9 15 16]).^2);
+        
         seq_descr = [ seq_descr descr_au ];
     end
     
@@ -125,5 +123,5 @@ for i = 1:n_seq
         
 end
 
-
+%% save descriptor file
 save(fn_out, 'samples');

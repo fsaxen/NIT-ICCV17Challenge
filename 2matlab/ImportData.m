@@ -1,20 +1,24 @@
+
+%% define filenames
 if train_val_or_test == 0
-    fn_in_filenames = [data_folder, 'filenames_train.txt'];
-    fn_in_AUs = [data_folder, 'AUOld_train_nomax.txt'];
-    fn_in_identity = [data_folder, 'face_recognition_train.txt'];
-    fn_out = [data_folder, 'AUOld_train.mat'];
+    fn_in_filenames = [data_folder, 'train_filenames.txt'];
+    fn_in_AUs = [data_folder, 'train_AUOld.txt'];
+    fn_in_identity = [data_folder, 'train_face_recognition.txt'];
+    fn_out = [data_folder, 'train_AUOld.mat'];
 elseif train_val_or_test == 1
-    fn_in_filenames = [data_folder, 'filenames_val.txt'];
-    fn_in_AUs = [data_folder, 'AUOld_val_nomax.txt'];
-    fn_in_identity = [data_folder, 'face_recognition_val.txt'];
-    fn_out = [data_folder, 'AUOld_val.mat'];
+    fn_in_filenames = [data_folder, 'val_filenames.txt'];
+    fn_in_AUs = [data_folder, 'val_AUOld.txt'];
+    fn_in_identity = [data_folder, 'val_face_recognition.txt'];
+    fn_out = [data_folder, 'val_AUOld.mat'];
 elseif train_val_or_test == 2
-    fn_in_filenames = [data_folder, 'filenames_test.txt'];
-    fn_in_AUs = [data_folder, 'AUOld_test_nomax.txt'];
-    fn_in_identity = [data_folder, 'face_recognition_test.txt'];
-    fn_out = [data_folder, 'AUOld_test.mat'];
+    fn_in_filenames = [data_folder, 'test_filenames.txt'];
+    fn_in_AUs = [data_folder, 'test_AUOld.txt'];
+    fn_in_identity = [data_folder, 'test_face_recognition.txt'];
+    fn_out = [data_folder, 'test_AUOld.mat'];
 end
 
+
+%% read sample filenames
 [fid, errmsg] = fopen(fn_in_filenames,'rt');
 if fid < 0
     error([fn_in_filenames ' - ' errmsg]);
@@ -22,33 +26,45 @@ end
 
 sample_filenames = textscan(fid,'%s','Delimiter','\n');
 sample_filenames = sample_filenames{1};
-if training_set
-    sample_filenames = cellfun(@(x) strrep(x,'Train/',''), sample_filenames, 'UniformOutput', false);
+if train_val_or_test == 0
+    for i = 1:length(sample_filenames)
+        [path,name,ext] = fileparts(sample_filenames{i});
+        path_dirs = strsplit(path, {'/','\\'});
+        sample_filenames{i} = [path_dirs{end} '/' name ext];
+    end    
 else
-    sample_filenames = cellfun(@(x) strrep(x,'Val/',''), sample_filenames, 'UniformOutput', false);
+    for i = 1:length(sample_filenames)
+        [~,name,ext] = fileparts(sample_filenames{i});
+        sample_filenames{i} = [name ext];
+    end
 end
 fclose(fid);
 
-if ~training_set
-    face_recognition_val = csvread(fn_in_identity);
-    face_recognition_val = face_recognition_val(:,2);
+
+%% face recognition results
+if train_val_or_test ~= 0
+    face_recognition = csvread(fn_in_identity);
+    face_recognition = face_recognition(:,2);
 end
 
 
+%% read action unit scores
+data = load(fn_in_AUs);
+
+
+%% fill sample table
 samples = struct('sample_id', [], ...
     'subject_id', [],...
     'label', [],...
     'video_name', cell(length(sample_filenames),1),...
     'emotion',[],...
     'data',[]);
-
-data = load(fn_in_AUs);
-
 for i = 1:length(sample_filenames)
     samples(i).sample_id = i;
     samples(i).data = data(data(:,1) == i-1, 3:end);
     samples(i).video_name = sample_filenames{i};
-    if training_set
+    if train_val_or_test == 0
+        % training set
         [path,name] = fileparts(sample_filenames{i});
         samples(i).subject_id = str2double(path);
         switch upper(name)
@@ -92,6 +108,7 @@ for i = 1:length(sample_filenames)
                 error('unknown: %s', name);
         end
     else
+        % validation or test set
         [~,name] = fileparts(sample_filenames{i});
         parts = strsplit(name,'_');
         switch upper(parts{2})
@@ -110,8 +127,9 @@ for i = 1:length(sample_filenames)
             otherwise
                 error('unknown: %s', name);
         end
-        samples(i).subject_id = face_recognition_val(i);
+        samples(i).subject_id = face_recognition(i);
     end
 end
 
+%% save sample table
 save(fn_out,'samples');
