@@ -1,3 +1,6 @@
+// Authors: Frerk Saxen and Philipp Werner (Frerk.Saxen@ovgu.de, Philipp.Werner@ovgu.de)
+// License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 //#include <opencv2/video/video.hpp>
@@ -5,9 +8,6 @@
 
 #include <iostream>
 #include <chrono>
-
-// Authors: Frerk Saxen and Philipp Werner
-// License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
 
 #include <dlib/image_processing.h>
 #include <dlib/opencv.h>
@@ -22,8 +22,7 @@
 using namespace dlib;
 using namespace std;
 
-int detectAUsOld(const std::string& exdata_dir, const std::string& train_or_val_or_test)
-try
+void detectAUsOld(const std::string& exdata_dir, const std::string& train_or_val_or_test)
 {
 	std::string filename_list_filename = exdata_dir + train_or_val_or_test + "_filenames.txt";
 	std::string filename_face_detection = exdata_dir + train_or_val_or_test + "_facedet.txt";
@@ -147,12 +146,5 @@ try
 	    }
 	AUFile.close();
 	
-	return 0;
-}
-catch (std::exception& e)
-{
-	cout << e.what() << endl;
-	//cout << "hit enter to terminate" << endl;
-	//cin.get();
-	return -1;
+	return;
 }

@@ -1,4 +1,4 @@
-// Authors: Frerk Saxen and Philipp Werner
+// Authors: Frerk Saxen and Philipp Werner (Frerk.Saxen@ovgu.de, Philipp.Werner@ovgu.de)
 // License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
 
 #include <iostream>

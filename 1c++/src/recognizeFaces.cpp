@@ -1,4 +1,4 @@
-// Authors: Frerk Saxen and Philipp Werner
+// Authors: Frerk Saxen and Philipp Werner (Frerk.Saxen@ovgu.de, Philipp.Werner@ovgu.de)
 // License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
 
 #include <opencv2/core/core.hpp>
@@ -10,6 +10,7 @@
 #include <chrono>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 //#include <FaceBase/FaceRegistrationTrained.hpp>
 //#include <FaceBase/FaceLibDlib.hpp>
@@ -58,7 +59,6 @@ using face_rec_net_type = loss_metric<fc_no_bias<128, avg_pool_everything<
 	>>>>>>>>>>>>;
 
 void recognizeFaces(const std::string& exdata_dir, const std::string& train_or_val_or_test)
-try
 {
 	std::string filename_list_filename = exdata_dir + train_or_val_or_test + "_filenames.txt";
 	std::string filename_face_detection = exdata_dir + train_or_val_or_test + "_facedet.txt";
@@ -93,10 +93,10 @@ try
 
 	matrix<dlib::rgb_pixel> img;
 	cv::Mat cvImage;
-	std::vector<std::vector<matrix<float, 0, 1>>> face_descriptors;
+	typedef matrix<float, 0, 1> sample_type;
+	std::vector<std::vector<sample_type>> face_descriptors;
 	std::vector<matrix<rgb_pixel>> first_frame;
 
-// 	image_window win;
 	for(long vid_id = 0; vid_id < filename_list.size(); ++vid_id)
 	{
 	      const auto vid_filename = filename_list.at(vid_id);
@@ -142,45 +142,26 @@ try
 	      face_descriptors.push_back(face_rec_net(faces));
 	}
 	
-	// In particular, one simple thing we can do is face clustering.  This next bit of code
-	// creates a graph of connected faces and then uses the Chinese whispers graph clustering
-	// algorithm to identify how many people there are and which faces belong to whom.
-	std::vector<sample_pair> edges;
-// 	double distances[60][60];
-	for (size_t i = 0; i < face_descriptors.size(); ++i)
-	{
-// 	    distances[i][i] = 0.0;
-	    for (size_t j = i+1; j < face_descriptors.size(); ++j)
-	    {
-		double avg_length = 0;
-		for (size_t ii = 0; ii < face_descriptors[i].size(); ++ii)
-		    for (size_t jj = 0; jj < face_descriptors[j].size(); ++jj)
-			avg_length += length(face_descriptors[i][ii]-face_descriptors[j][jj]);
-		avg_length /= face_descriptors[i].size() * face_descriptors[j].size(); // -1) * 0.5
-	      
-// 		distances[i][j] = avg_length;
-// 		distances[j][i] = avg_length;
-		
-// 		std::cout << "i=" << i << " j=" << j << " avg_length=" << avg_length << std::endl;
-		// Faces are connected in the graph if they are close enough.  Here we check if
-		// the distance between two face descriptors is less than 0.6, which is the
-		// decision threshold the network was trained to use.  Although you can
-		// certainly use any other threshold you find useful.
-		if (avg_length < 0.6)
-		    edges.push_back(sample_pair(i,j));
-	    }
-	}
-	std::vector<unsigned long> labels;
-	const auto num_clusters = chinese_whispers(edges, labels);
-	cout << "number of people found in the image: "<< num_clusters << endl;	
+// 	dlib::deserialize(exdata_dir + "train_face_descriptors.dat") >> face_descriptors >> first_frame;
 	
-// 	std::ofstream distance_file("/home/frerk/distances4.txt");
-// 	for(long i = 0; i < 60; i++)
-// 	{
-// 	      for(long j = 0; j < 60; j++)
-// 		    distance_file << distances[i][j] << ",";
-// 	      distance_file << std::endl;
-// 	}
+	
+	typedef std::vector<sample_type> vec_sample_type;
+	
+	const long num_clusters = filename_list.size() / 12; // There are always 12 videos of the same person
+	
+	auto dist_function = [](const vec_sample_type& a, const vec_sample_type&b)
+	{
+		std::vector<double> dists;
+		for (size_t i = 0; i < a.size(); ++i)
+		    for (size_t j = 0; j < b.size(); ++j)
+			dists.push_back(length(a[i]-b[j]));
+		std::sort(dists.begin(),dists.end());
+ 		double median = dists.at(dists.size() / 2);
+		return 1.0 / (median + 0.00001);
+	};
+	
+ 	std::vector<unsigned long> labels = spectral_cluster(dist_function, face_descriptors, num_clusters);
+	
 	
 	// Now let's display the face clustering results on the screen.  It hopefully
 	// correctly grouped all the faces. 
@@ -206,14 +187,7 @@ try
 		  idFile << vid_id << "," << labels[vid_id] << "\n";
 	}
 	idFile.close();
-// 	std::cin.get();
+//  	std::cin.get();
 	
-	return;
-}
-catch (std::exception& e)
-{
-	cout << e.what() << endl;
-	//cout << "hit enter to terminate" << endl;
-	//cin.get();
 	return;
 }

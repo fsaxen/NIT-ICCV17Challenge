@@ -1,4 +1,4 @@
-// Authors: Frerk Saxen and Philipp Werner
+// Authors: Frerk Saxen and Philipp Werner (Frerk.Saxen@ovgu.de, Philipp.Werner@ovgu.de)
 // License: BSD 2-Clause "Simplified" License (see LICENSE file in root directory)
 
 /* This is the main execution entry for extracting all necessary features for training, validation, and testing.
@@ -12,7 +12,7 @@
 #include <experimental/filesystem>
 void createFileNameList(const std::string& dataset_dir, const std::string& exdata_dir, const std::string& train_or_val_or_test);
 void detectFace(const std::string& exdata_dir, const std::string& train_or_val_or_test);
-int detectAUsOld(const std::string& exdata_dir, const std::string& train_or_val_or_test);
+void detectAUsOld(const std::string& exdata_dir, const std::string& train_or_val_or_test);
 void recognizeFaces(const std::string& exdata_dir, const std::string& train_or_val_or_test);
 int help();
 
@@ -38,18 +38,26 @@ int main(int argc, char **argv)
 	if(exdata_dir.back() != '/')
 		exdata_dir.push_back('/');
 	
-
-	std::cout << "1. Create Filename list from dataset folder ..." << std::endl;
- 	createFileNameList(dataset_dir, exdata_dir, train_or_val_or_test);
-	std::cout << "Done.\n2. Detect faces in each video ..." << std::endl;
- 	detectFace(exdata_dir, train_or_val_or_test);
-	std::cout << "Done.\n3. Extract Action Units in each frame ..." << std::endl;
-  	detectAUsOld(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_AUsOld);
-  	std::cout << "Done.\n4. Recognize faces ... " << std::endl;
-  	recognizeFaces(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_face_recognition);
-	std::cout << "Done. \nYou are now finished with the C++ part. Please execute the main.m file in the matlab folder with matlab R2015a or newer." << std::endl;
-	
-	std::cin.get();
+	try
+	{
+		std::cout << "1. Create Filename list from dataset folder ..." << std::endl;
+		createFileNameList(dataset_dir, exdata_dir, train_or_val_or_test);
+		std::cout << "Done.\n2. Detect faces in each video ..." << std::endl;
+		detectFace(exdata_dir, train_or_val_or_test);
+		std::cout << "Done.\n3. Extract Action Units in each frame ..." << std::endl;
+		detectAUsOld(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_AUsOld);
+		std::cout << "Done.\n4. Recognize faces ... " << std::endl;
+		recognizeFaces(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_face_recognition);
+ 		std::cout << "Done. \nYou are now finished with the C++ part. Please execute the main.m file in the matlab folder with matlab R2015a or newer.\nPress Enter to continue." << std::endl;
+		std::cin.get();
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		std::cout << "Caution. Errors occured. You can not proceed with matlab. Please contact the authors if you cannot resolve the issues. Press enter to terminate." << std::endl;
+		std::cin.get();
+		return -1;
+	}	
 	return 0;
 }
 
