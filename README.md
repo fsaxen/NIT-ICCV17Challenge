@@ -18,7 +18,7 @@ dlib version 19.4 (download http://dlib.net/files/dlib-19.4.tar.bz2)
 opencv version 3.1 or newer (download https://github.com/opencv/opencv/archive/3.1.0.zip)
 
 # 4. Download exdata
-Please download exdata from http://www-e.uni-magdeburg.de/saxen/share/exdata.zip (455 MB)
+Please download exdata from http://wasd.urz.uni-magdeburg.de/saxen/share/exdata.zip (455 MB)
 It contains trained model files (face detector, landmark detector, action unit detector, face recognition model) that are used to extract the features. While executing the c++ and matlab code this folder will be filled with the extracted features (and some intermediate files).
 
 # 5. Make Project
