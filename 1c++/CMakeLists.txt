@@ -39,6 +39,8 @@ endif()
 # add opencv library to project
 if(NOT OpenCV_FOUND)
 	message(ERROR "OpenCV was not found.")
+else()
+	message(STATUS "Found OpenCV version ${OpenCV_VERSION}")
 endif()
 set(include_dirs ${include_dirs} ${OpenCV_INCLUDE_DIRS})
 

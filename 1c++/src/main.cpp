@@ -45,9 +45,9 @@ int main(int argc, char **argv)
 		std::cout << "Done.\n2. Detect faces in each video ..." << std::endl;
 		detectFace(exdata_dir, train_or_val_or_test);
 		std::cout << "Done.\n3. Extract Action Units in each frame ..." << std::endl;
-		detectAUsOld(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_AUsOld);
+		detectAUsOld(exdata_dir, train_or_val_or_test);
 		std::cout << "Done.\n4. Recognize faces ... " << std::endl;
-		recognizeFaces(exdata_dir, train_or_val_or_test); //, filename_list_filename, filename_face_detection, filename_face_recognition);
+		recognizeFaces(exdata_dir, train_or_val_or_test);
  		std::cout << "Done. \nYou are now finished with the C++ part. Please execute the main.m file in the matlab folder with matlab R2015a or newer.\nPress Enter to continue." << std::endl;
 		std::cin.get();
 	}
