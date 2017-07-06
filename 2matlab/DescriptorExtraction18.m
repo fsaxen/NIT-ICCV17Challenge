@@ -2,13 +2,13 @@ vis = 0;    % visualization?
 
 % filenames
 if train_val_or_test == 0
-    fn_in_AUs = [data_folder, 'train_AUOld.txt'];
+    fn_in_AUs = [data_folder, 'train_AUOld.mat'];
     fn_out = [data_folder, 'train_AUOld_descriptor18.mat'];
 elseif train_val_or_test == 1
-    fn_in_AUs = [data_folder, 'val_AUOld.txt'];
+    fn_in_AUs = [data_folder, 'val_AUOld.mat'];
     fn_out = [data_folder, 'val_AUOld_descriptor18.mat'];
 elseif train_val_or_test == 2
-    fn_in_AUs = [data_folder, 'test_AUOld.txt'];
+    fn_in_AUs = [data_folder, 'test_AUOld.mat'];
     fn_out = [data_folder, 'test_AUOld_descriptor18.mat'];
 end
 
