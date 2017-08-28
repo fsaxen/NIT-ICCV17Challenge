@@ -1,5 +1,16 @@
 # NIT-ICCV17Challenge
-This code submission for the ICCV 17 Real Versus Fake Expressed Emotion Challenge provides source code to extract the features and classify each video for a given folder.
+This code submission for the [ICCV 17 Real Versus Fake Expressed Emotion Challenge](http://chalearnlap.cvc.uab.es/challenge/25/track/25/description/) provides source code to extract the features and classify each video for a given folder.
+
+If you use this code and/or our trained models, please cite:
+
+> F. Saxen, P. Werner, and A. Al-Hamadi, ["Real vs. Fake Emotion Challenge: Learning to Rank Authenticity From Facial Activity Descriptors"](https://www.researchgate.net/publication/319316240_Real_vs_Fake_Emotion_Challenge_Learning_to_Rank_Authenticity_From_Facial_Activity_Descriptors), International Conference on Computer Vision Workshops (ICCVW), 2017.
+
+If you use the facial action unit intensity estimation code and/or our trained models, please cite:
+
+> P. Werner, F. Saxen, and A. Al-Hamadi, ["Handling Data Imbalance in Automatic Facial Action Intensity Estimation"](https://www.researchgate.net/publication/281811172_Handling_Data_Imbalance_in_Automatic_Facial_Action_Intensity_Estimation), British Machine Vision Conference (BMVC), 2015.
+
+Next to the papers, see the file factsheet.pdf in the top-level directory of this repository for some details on the method etc.
+
 
 ## 1. System Requirements
 Linux (we use Ubuntu 16.04 LTS)
